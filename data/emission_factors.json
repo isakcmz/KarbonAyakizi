@@ -1,0 +1,23 @@
+{
+  "electricity_kg_per_kwh": 0.42,
+  "natural_gas_kg_per_m3": 2.0,
+
+  "car_petrol_kg_per_km": 0.192,
+  "car_diesel_kg_per_km": 0.171,
+  "car_hybrid_kg_per_km": 0.120,
+  "car_ev_kg_per_km": 0.05,
+
+  "bus_kg_per_km": 0.089,
+  "metro_kg_per_km": 0.041,
+  "plane_kg_per_hour": 90,
+
+  "water_kg_per_m3": 0.5,
+
+  "beef_kg_per_kg": 27.0,
+  "chicken_kg_per_kg": 6.9,
+  "vegetable_kg_per_kg": 2.0,
+  "dairy_kg_per_kg": 3.0,
+
+  "waste_mixed_kg_per_kg": 1.8,
+  "waste_recycled_saving_kg_per_kg": 0.8
+}
