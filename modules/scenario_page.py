@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 
 from logic.calculations import (
     calc_total_co2,
@@ -106,7 +107,28 @@ def page_scenarios():
     )
 
     st.dataframe(comp_df.set_index("Kategori"))
-    st.bar_chart(comp_df.set_index("Kategori"))
+    
+    # --- Önce / Sonra karşılaştırma grafiği ---
+    fig = px.bar(
+        comp_df,
+        x="Kategori",
+        y=["Mevcut (kg/yıl)", "Senaryo (kg/yıl)"],
+        barmode="group",     # BURASI YAN YANA YAPAN KISIM
+        text_auto=True,
+        color_discrete_map={
+            "Mevcut (kg/yıl)": "#3b82f6",    # mavi
+            "Senaryo (kg/yıl)": "#93c5fd",   # açık mavi
+        },
+    )
+
+    fig.update_layout(
+        title="Önce / Sonra Karşılaştırması",
+        yaxis_title="CO₂ (kg/yıl)",
+        xaxis_title="Kategori",
+        height=500,
+        bargap=0.25,
+    )
+    st.plotly_chart(fig, width="stretch")
 
     diff = base_total - new_results["total"]
     st.success(
