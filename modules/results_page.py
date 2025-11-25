@@ -4,6 +4,7 @@ import plotly.express as px
 
 
 from logic.calculations import calc_total_co2
+from logic.recommendations import generate_recommendations
 
 
 # Bu projede referans alınan yaklaşık kişi başı yıllık CO₂ değerleri (ton/yıl)
@@ -115,3 +116,12 @@ def page_results():
         "Soldaki menüden **Azaltım Senaryoları** sayfasına geçerek, alışkanlıklarını değiştirirsen "
         "emisyonunun bu ortalamalara göre nasıl değişeceğini inceleyebilirsin."
     )
+
+    # --- 4) Kişisel öneriler (kategori bazlı) ---
+    st.markdown("---")
+    st.markdown("### Kişisel Öneriler (Kategori Bazlı)")
+
+    recommendations = generate_recommendations(results)
+
+    for rec in recommendations:
+        st.markdown(f"✅ {rec}")
