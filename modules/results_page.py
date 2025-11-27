@@ -6,6 +6,7 @@ import plotly.express as px
 from logic.calculations import calc_total_co2
 from logic.recommendations import generate_recommendations
 from logic.report_generator import create_pdf_report
+from logic.sustainability_score import compute_sustainability_score
 
 
 
@@ -24,6 +25,39 @@ def page_results():
     total_ton = total_kg / 1000  # kg → ton
 
     st.metric("Yıllık Karbon Ayak İzin", f"{total_ton:.2f} ton CO₂")
+
+
+    # --- Sürdürülebilirlik Skoru ---
+    score_data = compute_sustainability_score(results)
+    score = score_data["score"]
+    level = score_data["level"]
+    msg = score_data["message"]
+
+    # Renk belirleme
+    bg = {
+        "excellent": "#d1fae5",
+        "good": "#f1fce1",
+        "medium": "#fef9c3",
+        "low": "#fee2e2",
+    }[level]
+
+    st.markdown(
+        f"""
+        <div style="
+            background:{bg};
+            border-radius:15px;
+            padding:20px;
+            margin-top:15px;
+            border: 1px solid #cbd5e1;
+        ">
+            <h3 style="margin:0;">🌿 Sürdürülebilirlik Skoru: {score}/100</h3>
+            <p style="margin-top:8px; font-size:1.0rem;">{msg}</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
 
     # --- 2) Kategorilere göre dağılım (kg/yıl) ---
     st.markdown("### Kategorilere Göre Dağılım (kg/yıl)")
