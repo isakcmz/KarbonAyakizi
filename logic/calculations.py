@@ -40,7 +40,15 @@ def calc_energy_co2(data: dict) -> float:
     total = 0.0
 
     monthly_kwh = data.get("electricity_kwh_per_month", 0)
-    total += monthly_kwh * 12 * FACTORS["electricity_kg_per_kwh"]
+    renewable_pct = data.get("renewable_pct", 0)  # YENİ
+    renewable_ratio = renewable_pct / 100
+
+    # Elektrik: yenilenebilir kısmı 0 kabul edilir
+    yearly_kwh = monthly_kwh * 12
+    base_elec = yearly_kwh * FACTORS["electricity_kg_per_kwh"]
+    adj_elec = base_elec * (1 - renewable_ratio)
+
+    total += adj_elec
 
     monthly_gas_m3 = data.get("gas_m3_per_month", 0)
     total += monthly_gas_m3 * 12 * FACTORS["natural_gas_kg_per_m3"]

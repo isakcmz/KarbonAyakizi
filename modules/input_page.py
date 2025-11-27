@@ -112,11 +112,11 @@ def page_input():
     # 2) ENERJİ
     # -------------------------
     with tab2:
-        st.subheader("Ev Enerjisi (Elektrik + Isınma)")
+        st.subheader("Ev Enerjisi (Elektrik + Isınma + Yenilenebilir Enerji)")
 
         st.info(
-            "Evde tükettiğin elektrik ve ısınma (doğalgaz vb.), enerji kaynaklı karbon ayak izini oluşturur. "
-            "Buradaki değerler aylıktan yıllığa çevrilir."
+            "Elektrik tüketiminin bir kısmı yenilenebilir kaynaklardan geliyorsa "
+            "karbon ayak izinde ciddi düşüş sağlar."
         )
 
         col1, col2 = st.columns(2)
@@ -124,25 +124,44 @@ def page_input():
             monthly_kwh = st.number_input(
                 "Aylık elektrik tüketimi (kWh)",
                 min_value=0.0,
-                value=float(
-                    st.session_state["energy"].get(
-                        "electricity_kwh_per_month", 200
-                    )
-                ),
+                value=float(st.session_state["energy"].get("electricity_kwh_per_month", 200)),
                 step=10.0,
             )
         with col2:
             gas_m3 = st.number_input(
                 "Aylık doğalgaz tüketimi (m³)",
                 min_value=0.0,
-                value=float(
-                    st.session_state["energy"].get("gas_m3_per_month", 0)
-                ),
+                value=float(st.session_state["energy"].get("gas_m3_per_month", 0)),
                 step=5.0,
             )
 
+        # ✔ YENİ: Yenilenebilir enerji oranı
+        renewable_pct = st.slider(
+            "Elektriğimin yüzde kaçı yenilenebilir enerjiden geliyor?",
+            min_value=0,
+            max_value=100,
+            value=int(st.session_state["energy"].get("renewable_pct", 0)),
+            step=5,
+        )
+
         st.session_state["energy"]["electricity_kwh_per_month"] = monthly_kwh
         st.session_state["energy"]["gas_m3_per_month"] = gas_m3
+        st.session_state["energy"]["renewable_pct"] = renewable_pct
+
+        # ✔ Canlı gösterim
+        from logic.config import FACTORS
+
+        yearly_kwh = monthly_kwh * 12
+        base_emission = yearly_kwh * FACTORS["electricity_kg_per_kwh"]
+
+        renewable_ratio = renewable_pct / 100
+        new_electric_emission = base_emission * (1 - renewable_ratio)
+
+        st.success(
+            f"📉 Yenilenebilir oranı **%{renewable_pct}** seçildiğinde elektrik kaynaklı CO₂: "
+            f"**{new_electric_emission:.0f} kg/yıl** (önce: {base_emission:.0f} kg/yıl)"
+        )
+
 
     # -------------------------
     # 3) SU

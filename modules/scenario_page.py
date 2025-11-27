@@ -14,6 +14,8 @@ from logic.calculations import (
 )
 from logic.scenario_store import add_scenario
 from logic.report_generator import create_pdf_report
+from logic.config import FACTORS
+
 
 
 def page_scenarios():
@@ -244,3 +246,39 @@ def page_scenarios():
         f"yaklaşık **{current_total/1000:.2f} ton** seviyesine iner "
         f"(mevcut: {base_total/1000:.2f} ton)."
     )
+
+
+
+
+    # ====================================================
+    #   ANINDA SİMÜLASYON – YENİLENEBİLİR ENERJİ
+    # ====================================================
+    st.markdown("### ⚡ Anında Simülasyon – Yenilenebilir Enerji Etkisi")
+
+    energy_state = st.session_state.get("energy", {})
+    old_pct = energy_state.get("renewable_pct", 0)
+    monthly_kwh = energy_state.get("electricity_kwh_per_month", 0)
+
+    if monthly_kwh == 0:
+        st.info("Yenilenebilir enerji etkisini görebilmek için elektrik tüketimi girmen gerekiyor.")
+    else:
+        sim_pct = st.slider(
+            "Elektriğinin yüzde kaçını yenilenebilir yapmak istersin?",
+            min_value=0,
+            max_value=100,
+            value=old_pct,
+            step=5,
+        )
+
+        yearly_kwh = monthly_kwh * 12
+        base_elec = yearly_kwh * FACTORS["electricity_kg_per_kwh"]
+        new_elec = base_elec * (1 - sim_pct / 100)
+
+        st.write(f"Mevcut elektrik CO₂: **{base_elec:.0f} kg/yıl**")
+        st.write(f"Yeni seçime göre CO₂: **{new_elec:.0f} kg/yıl**")
+
+        st.success(
+            f"Bu seçimle elektrik kaynaklı CO₂ emisyonun **{(base_elec - new_elec):.0f} kg/yıl** azalır."
+        )
+
+
