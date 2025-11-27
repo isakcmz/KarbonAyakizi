@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from logic.scenario_store import add_scenario
+from logic.report_generator import create_pdf_report
 
 from logic.calculations import (
     calc_total_co2,
@@ -144,5 +145,23 @@ def page_scenarios():
             new_data=new_results
         )
         st.success("Senaryo başarıyla kaydedildi! 🎉")
+
+
+    if st.button("📄 Bu Senaryonun PDF Raporunu Oluştur"):
+        pdf_path = create_pdf_report(
+            results=base,
+            scenario={
+                "base_total": base_total,
+                "new_total": new_results["total"]
+            }
+        )
+        with open(pdf_path, "rb") as f:
+            st.download_button(
+                label="📄 PDF Raporu İndir",
+                data=f,
+                file_name="senaryo_raporu.pdf",
+                mime="application/pdf"
+            )
+
 
     

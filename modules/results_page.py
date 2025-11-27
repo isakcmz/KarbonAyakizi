@@ -5,6 +5,8 @@ import plotly.express as px
 
 from logic.calculations import calc_total_co2
 from logic.recommendations import generate_recommendations
+from logic.report_generator import create_pdf_report
+
 
 
 # Bu projede referans alınan yaklaşık kişi başı yıllık CO₂ değerleri (ton/yıl)
@@ -94,6 +96,9 @@ def page_results():
     st.plotly_chart(fig, width="stretch")
 
 
+    
+
+
     # Duruma göre kısa yorum
     yorum = ""
     if total_ton < TURKEY_AVG_TON * 0.7:
@@ -106,6 +111,7 @@ def page_results():
         yorum = "Türkiye ve dünya ortalamasının **üzerindesin**. Ulaşım, et tüketimi ve enerji kullanımını gözden geçirerek emisyonunu ciddi oranda azaltabilirsin. 🔍"
 
     st.warning(yorum)
+
 
     st.caption(
         "Not: Karşılaştırma değerleri, literatürde sıkça kullanılan yaklaşık kişi başı yıllık CO₂ "
@@ -125,3 +131,14 @@ def page_results():
 
     for rec in recommendations:
         st.markdown(f"✅ {rec}")
+
+
+    pdf_path = create_pdf_report(results)
+
+    with open(pdf_path, "rb") as f:
+        st.download_button(
+            label="📄 PDF Raporu İndir",
+            data=f,
+            file_name="karbon_ayak_izi_raporu.pdf",
+            mime="application/pdf"
+        )

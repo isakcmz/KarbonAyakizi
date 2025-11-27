@@ -20,5 +20,49 @@
             "waste": 1029.6,
             "total": 5821.2
         }
+    },
+    {
+        "date": "2025-11-27 20:12",
+        "base_total_kg": 5839.464,
+        "scenario_total_kg": 4897.224,
+        "reduction_kg": 942.2399999999998,
+        "base_data": {
+            "transport": 330.904,
+            "energy": 1968.0,
+            "water": 42.0,
+            "food": 2849.6,
+            "waste": 648.96,
+            "total": 5839.464
+        },
+        "scenario_data": {
+            "transport": 330.904,
+            "energy": 1968.0,
+            "water": 42.0,
+            "food": 2007.2,
+            "waste": 549.1200000000001,
+            "total": 4897.224
+        }
+    },
+    {
+        "date": "2025-11-27 20:43",
+        "base_total_kg": 8010.88,
+        "scenario_total_kg": 7266.76,
+        "reduction_kg": 744.1199999999999,
+        "base_data": {
+            "transport": 247.6,
+            "energy": 3256.8,
+            "water": 48.0,
+            "food": 3728.4,
+            "waste": 730.0799999999999,
+            "total": 8010.88
+        },
+        "scenario_data": {
+            "transport": 247.6,
+            "energy": 3256.8,
+            "water": 48.0,
+            "food": 3096.6,
+            "waste": 617.76,
+            "total": 7266.76
+        }
     }
 ]
