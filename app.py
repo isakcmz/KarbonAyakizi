@@ -8,6 +8,7 @@ from modules.input_page import page_input
 from modules.results_page import page_results
 from modules.scenario_page import page_scenarios
 from modules.about_page import page_about
+from modules.saved_scenarios_page import page_saved_scenarios
 
 
 def main():
@@ -30,6 +31,7 @@ def main():
         "📝 Veri Girişi": "Veri Girişi",
         "📊 Sonuç & Analiz": "Sonuç & Analiz",
         "🔄 Azaltım Senaryoları": "Azaltım Senaryoları",
+        "🗂 Kaydedilen Senaryolar": "Kaydedilen Senaryolar",
         "ℹ️ Hakkında": "Hakkında",
     }
 
@@ -59,6 +61,8 @@ def main():
         page_results()
     elif menu == "Azaltım Senaryoları":
         page_scenarios()
+    elif menu == "Kaydedilen Senaryolar":
+        page_saved_scenarios()    
     elif menu == "Hakkında":
         page_about()
 

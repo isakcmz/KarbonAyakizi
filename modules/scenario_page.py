@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from logic.scenario_store import add_scenario
 
 from logic.calculations import (
     calc_total_co2,
@@ -134,3 +135,14 @@ def page_scenarios():
     st.success(
         f"Bu senaryoda yıllık CO₂ emisyonunu **{diff/1000:.2f} ton** azaltmış oluyorsun."
     )
+
+    if st.button("💾 Senaryoyu Kaydet"):
+        add_scenario(
+            base_total=base_total,
+            new_total=new_results["total"],
+            base_data=base,
+            new_data=new_results
+        )
+        st.success("Senaryo başarıyla kaydedildi! 🎉")
+
+    

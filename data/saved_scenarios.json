@@ -1,0 +1,24 @@
+[
+    {
+        "date": "2025-11-27 20:04",
+        "base_total_kg": 6148.8,
+        "scenario_total_kg": 5821.2,
+        "reduction_kg": 327.60000000000036,
+        "base_data": {
+            "transport": 372.4,
+            "energy": 2208.0,
+            "water": 360.0,
+            "food": 1991.6,
+            "waste": 1216.8,
+            "total": 6148.8
+        },
+        "scenario_data": {
+            "transport": 372.4,
+            "energy": 2208.0,
+            "water": 360.0,
+            "food": 1851.2,
+            "waste": 1029.6,
+            "total": 5821.2
+        }
+    }
+]
