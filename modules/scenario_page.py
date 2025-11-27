@@ -1,8 +1,8 @@
+# modules/scenario_page.py
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from logic.scenario_store import add_scenario
-from logic.report_generator import create_pdf_report
 
 from logic.calculations import (
     calc_total_co2,
@@ -12,16 +12,19 @@ from logic.calculations import (
     calc_food_co2,
     calc_waste_co2,
 )
+from logic.scenario_store import add_scenario
+from logic.report_generator import create_pdf_report
 
 
 def page_scenarios():
     st.title("Azaltım Senaryoları")
+
     st.write(
         "Aşağıdaki ayarlarla oynayarak bazı alışkanlıklarını değiştirirsen "
         "yıllık CO₂ emisyonunun ne kadar azalacağını görebilirsin."
     )
 
-    # Mevcut durumu hesapla
+    # --- Mevcut durumu hesapla ---
     base = calc_total_co2()
     base_total = base["total"]
 
@@ -109,27 +112,27 @@ def page_scenarios():
     )
 
     st.dataframe(comp_df.set_index("Kategori"))
-    
-    # --- Önce / Sonra karşılaştırma grafiği ---
+
+    # --- Yan yana (grouped) bar grafiği ---
     fig = px.bar(
         comp_df,
         x="Kategori",
         y=["Mevcut (kg/yıl)", "Senaryo (kg/yıl)"],
-        barmode="group",     # BURASI YAN YANA YAPAN KISIM
+        barmode="group",
         text_auto=True,
         color_discrete_map={
             "Mevcut (kg/yıl)": "#3b82f6",    # mavi
             "Senaryo (kg/yıl)": "#93c5fd",   # açık mavi
         },
+        title="Mevcut ve Senaryo Karşılaştırması",
     )
-
     fig.update_layout(
-        title="Önce / Sonra Karşılaştırması",
         yaxis_title="CO₂ (kg/yıl)",
         xaxis_title="Kategori",
         height=500,
         bargap=0.25,
     )
+
     st.plotly_chart(fig, width="stretch")
 
     diff = base_total - new_results["total"]
@@ -137,31 +140,107 @@ def page_scenarios():
         f"Bu senaryoda yıllık CO₂ emisyonunu **{diff/1000:.2f} ton** azaltmış oluyorsun."
     )
 
+    # --- Senaryoyu kaydet butonu ---
     if st.button("💾 Senaryoyu Kaydet"):
         add_scenario(
             base_total=base_total,
             new_total=new_results["total"],
             base_data=base,
-            new_data=new_results
+            new_data=new_results,
         )
         st.success("Senaryo başarıyla kaydedildi! 🎉")
 
-
+    # --- PDF raporu oluştur butonu ---
+    st.markdown("#### Bu Senaryonun PDF Raporu")
     if st.button("📄 Bu Senaryonun PDF Raporunu Oluştur"):
         pdf_path = create_pdf_report(
             results=base,
             scenario={
                 "base_total": base_total,
-                "new_total": new_results["total"]
-            }
+                "new_total": new_results["total"],
+            },
         )
         with open(pdf_path, "rb") as f:
             st.download_button(
                 label="📄 PDF Raporu İndir",
                 data=f,
                 file_name="senaryo_raporu.pdf",
-                mime="application/pdf"
+                mime="application/pdf",
             )
 
+    st.markdown("---")
 
-    
+    # ====================================================
+    #   ANINDA SİMÜLASYON – ULAŞIM ODAKLI
+    # ====================================================
+    st.markdown("### 🚗 Anında Simülasyon – Ulaşım Odaklı")
+
+    transport_state = st.session_state.get("transport", {})
+    use_car = transport_state.get("use_car", False)
+    old_days = transport_state.get("car_days_per_week", 0)
+
+    if not use_car or old_days == 0:
+        st.info(
+            "Ulaşım simülasyonu için araba kullanım bilgisi bulunamadı veya haftalık araba kullanımın 0. "
+            "Veri Girişi → Ulaşım sekmesinden araba kullanımını tanımlarsan burada anında etkiyi görebilirsin."
+        )
+        return
+
+    st.write(
+        "Aşağıdaki slider ile, haftada kaç gün daha az araba kullanırsan "
+        "toplam yıllık CO₂ emisyonunun nasıl değişeceğini anında görebilirsin."
+    )
+
+    sim_reduce_days = st.slider(
+        "Arabayı haftada kaç gün azaltmayı düşünüyorsun?",
+        min_value=0,
+        max_value=min(7, old_days),
+        value=2,
+        step=1,
+    )
+
+    # 0'dan old_days'e kadar tüm azaltım senaryolarını hesaplayalım
+    rows = []
+    for d in range(0, min(7, old_days) + 1):
+        tmp_transport = transport_state.copy()
+        tmp_transport["car_days_per_week"] = max(old_days - d, 0)
+
+        t = calc_transport_co2(tmp_transport)
+        e = calc_energy_co2(st.session_state["energy"])
+        w = calc_water_co2(st.session_state["water"])
+        f = calc_food_co2(st.session_state["food"])
+        wa = calc_waste_co2(st.session_state["waste"])
+
+        total = t + e + w + f + wa
+
+        rows.append(
+            {
+                "Azaltılan Gün": d,
+                "Toplam CO₂ (kg/yıl)": total,
+            }
+        )
+
+    sim_df = pd.DataFrame(rows)
+
+    # Seçilen değere karşılık gelen satır
+    current_row = sim_df[sim_df["Azaltılan Gün"] == sim_reduce_days].iloc[0]
+    current_total = current_row["Toplam CO₂ (kg/yıl)"]
+
+    # Çizgi grafik
+    fig_sim = px.line(
+        sim_df,
+        x="Azaltılan Gün",
+        y="Toplam CO₂ (kg/yıl)",
+        markers=True,
+        title="Arabayı Daha Az Kullanmanın Toplam CO₂ Üzerindeki Etkisi",
+    )
+    fig_sim.update_layout(height=450)
+
+    st.plotly_chart(fig_sim, width="stretch")
+
+    st.info(
+        f"Şu anda haftada **{old_days} gün** araba kullanıyorsun. "
+        f"Eğer bunu **{sim_reduce_days} gün azaltırsan**, toplam yıllık CO₂ emisyonun "
+        f"yaklaşık **{current_total/1000:.2f} ton** seviyesine iner "
+        f"(mevcut: {base_total/1000:.2f} ton)."
+    )
