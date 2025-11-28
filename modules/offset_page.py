@@ -16,9 +16,17 @@ def page_offset():
         """
     )
 
-    # Mevcut değerleri hesapla
-    base = calc_total_co2()
-    total = base["total"]
+    # Mevcut CO2 toplamını al
+    results = calc_total_co2()
+    total = results["total"]
+
+    # --- VERİ YOKSA HATA YERİNE UYARI GÖSTER ---
+    if total == 0:
+        st.warning(
+            "⚠️ Henüz veri girilmedi.\n\n"
+            "**Offset hesaplaması yapabilmek için önce Veri Girişi bölümünden alışkanlıklarını girmen gerekiyor.**"
+        )
+        return
 
     st.subheader("Mevcut Yıllık Karbon Ayak İzin")
     st.metric("Toplam CO₂:", f"{total/1000:.2f} ton / yıl")
@@ -31,7 +39,7 @@ def page_offset():
         min_value=0,
         max_value=500,
         value=10,
-        step=5
+        step=5,
     )
 
     tree_offset = trees * 22  # 1 ağaç ~ 22 kg CO2/yıl
@@ -45,10 +53,10 @@ def page_offset():
         "Yıllık kaç kWh yenilenebilir enerji projesine destek veriyorsun?",
         min_value=0.0,
         value=0.0,
-        step=10.0
+        step=10.0,
     )
 
-    green_offset = green_kwh * 0.45   # ortalama CO2 offset değeri
+    green_offset = green_kwh * 0.45  # ortalama CO2 offset değeri
 
     st.info(f"⚡ {green_kwh} kWh yeşil enerji → **{green_offset:.0f} kg CO₂** telafisi.")
 
@@ -59,7 +67,7 @@ def page_offset():
         "Kaç kg CO₂ karbon kredisi almak istersin?",
         min_value=0.0,
         value=0.0,
-        step=50.0
+        step=50.0,
     )
 
     st.success(f"💳 Seçilen karbon kredisi → **{carbon_credit:.0f} kg CO₂** telafisi.")
@@ -78,15 +86,14 @@ def page_offset():
     with col2:
         st.metric("Yeni Net CO₂", f"{new_total/1000:.2f} ton / yıl")
 
-    percent = (total_offset / total) * 100
+    # --- % iyileşme (0'a bölme kontrolü eklendi!) ---
+    percent = (total_offset / total) * 100 if total > 0 else 0
+
     st.write(f"🔽 Toplam karbon ayak izinde **%{percent:.1f}** iyileşme sağlandı.")
 
     # Grafik
     df = pd.DataFrame(
-        {
-            "Durum": ["Mevcut CO₂", "Net CO₂"],
-            "Değer": [total, new_total],
-        }
+        {"Durum": ["Mevcut CO₂", "Net CO₂"], "Değer": [total, new_total]}
     ).set_index("Durum")
 
     st.bar_chart(df, width="content")
