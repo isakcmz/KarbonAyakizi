@@ -11,7 +11,7 @@ from modules.about_page import page_about
 from modules.saved_scenarios_page import page_saved_scenarios
 from modules.offset_page import page_offset
 from modules.recommend_page import page_recommend
-
+from modules.comparison_page import page_comparison
 
 
 
@@ -38,6 +38,7 @@ def main():
         "🗂 Kaydedilen Senaryolar": "Kaydedilen Senaryolar",
         "🌿 Karbon Temizleme": "Offset",
         "🌱 Öneriler": "Öneriler",
+        "🌍 Küresel Karşılaştırma": "Küresel",
         "ℹ️ Hakkında": "Hakkında",
     }
 
@@ -72,7 +73,9 @@ def main():
     elif menu == "Offset":
         page_offset()
     elif menu == "Öneriler":
-        page_recommend()    
+        page_recommend()
+    elif menu == "Küresel":
+        page_comparison()    
     elif menu == "Hakkında":
         page_about()
 
