@@ -9,6 +9,9 @@ from modules.results_page import page_results
 from modules.scenario_page import page_scenarios
 from modules.about_page import page_about
 from modules.saved_scenarios_page import page_saved_scenarios
+from modules.offset_page import page_offset
+
+
 
 
 def main():
@@ -32,6 +35,7 @@ def main():
         "📊 Sonuç & Analiz": "Sonuç & Analiz",
         "🔄 Azaltım Senaryoları": "Azaltım Senaryoları",
         "🗂 Kaydedilen Senaryolar": "Kaydedilen Senaryolar",
+        "🌿 Karbon Temizleme": "Offset",
         "ℹ️ Hakkında": "Hakkında",
     }
 
@@ -62,7 +66,9 @@ def main():
     elif menu == "Azaltım Senaryoları":
         page_scenarios()
     elif menu == "Kaydedilen Senaryolar":
-        page_saved_scenarios()    
+        page_saved_scenarios()
+    elif menu == "Offset":
+        page_offset()    
     elif menu == "Hakkında":
         page_about()
 
