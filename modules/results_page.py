@@ -79,7 +79,7 @@ def page_results():
     # Ağaç eşdeğeri (kabaca 1 ağaç ~ 22 kg CO₂/yıl emiyor varsayımı)
     trees = total_kg / 22
     st.info(
-        f"Bu miktar yaklaşık **{trees:.0f} adet ağacın** bir yılda emeceği CO₂'ye eşdeğerdir."
+        f"Bu miktar yaklaşık **{trees:.0f} adet 🌳'ın** bir yılda emeceği CO₂'ye eşdeğerdir."
     )
 
     st.markdown("---")

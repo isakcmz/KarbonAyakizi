@@ -55,6 +55,46 @@ def page_scenarios():
         led_change = st.checkbox("Evde LED ampullere geçiyorum")
         better_recycling = st.checkbox("Geri dönüşüm seviyemi artırıyorum")
 
+
+
+    st.markdown("### Ek Ulaşım ve Yaşam Tarzı Seçenekleri")
+
+    colA, colB = st.columns(2)
+
+    with colA:
+        bike_km = st.slider(
+            "Bisiklet / Scooter kullanımı (km/hafta)",
+            min_value=0, max_value=200, value=0, step=5
+        )
+
+        extra_bus_km = st.slider(
+            "Ek toplu taşıma kullanımı (km/hafta)",
+            min_value=0, max_value=200, value=0, step=5
+        )
+
+        cancelled_flights = st.slider(
+            "Yılda iptal ettiğin kısa uçuş sayısı",
+            min_value=0, max_value=10, value=0, step=1
+        )
+
+    with colB:
+        efficient_devices = st.checkbox("Enerji verimli beyaz eşya kullanıyorum (%10 tasarruf)")
+        efficient_shower = st.checkbox("Verimli duş başlığı kullanıyorum (%15 su tasarrufu)")
+        full_machine = st.checkbox("Çamaşır/Bulaşık makinesini her zaman tam dolduruyorum (%8 su + enerji tasarrufu)")
+        vegan_days = st.slider(
+            "Haftada kaç gün vegan besleniyorsun?",
+            min_value=0, max_value=7, value=0, step=1
+        )
+        less_packaged = st.checkbox("Paketli gıda tüketimimi azaltıyorum (%5 atık tasarrufu)")
+        compost = st.checkbox("Organik atıkları komposta dönüştürüyorum (atığın %8'i azaltılır)")
+
+
+
+
+
+
+
+
     # --- Yeni veri kopyaları (mevcut veriyi bozmamak için) ---
     new_transport = st.session_state["transport"].copy()
     new_food = st.session_state["food"].copy()
@@ -78,6 +118,59 @@ def page_scenarios():
     # 4) Geri dönüşümü artırma
     if better_recycling:
         new_waste["recycle_level"] = "high"
+
+    # 5) Bisiklet / scooter → araba km’den düş
+    if bike_km > 0 and new_transport.get("use_car"):
+        saved_km = bike_km * 52
+        daily_km = new_transport.get("car_daily_km", 0)
+        new_transport["car_daily_km"] = max(daily_km - (saved_km / 365), 0)
+
+    # 6) Ek toplu taşıma → araba km azalt + toplu taşıma ekle
+    if extra_bus_km > 0 and new_transport.get("use_car"):
+        saved_km = extra_bus_km * 52
+        daily_km = new_transport.get("car_daily_km", 0)
+        new_transport["car_daily_km"] = max(daily_km - (saved_km / 365), 0)
+        new_transport["bus_km_per_week"] = new_transport.get("bus_km_per_week", 0) + extra_bus_km
+
+    # 7) Uçuş iptali
+    if cancelled_flights > 0:
+        reduction = cancelled_flights * 115  # 115 kg/flight
+        new_transport["plane_hours_per_year"] = max(
+            new_transport.get("plane_hours_per_year", 0) - (reduction / FACTORS["plane_kg_per_hour"]),
+            0
+        )
+
+    # 8) Enerji verimli beyaz eşya (%10 elektrik)
+    if efficient_devices:
+        new_energy["electricity_kwh_per_month"] *= 0.90
+
+    # 9) Verimli duş başlığı (%15 su)
+    if efficient_shower:
+        new_water_m3 = st.session_state["water"].get("water_m3_per_month", 0)
+        st.session_state["water"]["water_m3_per_month"] = new_water_m3 * 0.85
+
+    # 10) Makine tam doldurma (%8 su, %8 enerji)
+    if full_machine:
+        st.session_state["water"]["water_m3_per_month"] *= 0.92
+        new_energy["electricity_kwh_per_month"] *= 0.92
+
+    # 11) Vegan gün (haftada X gün)
+    if vegan_days > 0:
+        ratio = vegan_days / 7
+        new_food["beef_kg_per_week"] *= (1 - ratio)
+        new_food["chicken_kg_per_week"] *= (1 - ratio)
+
+    # 12) Paketli gıda azaltma (%5 atık)
+    if less_packaged:
+        weekly = new_waste.get("mixed_waste_kg_per_week", 0)
+        new_waste["mixed_waste_kg_per_week"] = weekly * 0.95
+
+    # 13) Kompost (%8 atık)
+    if compost:
+        weekly = new_waste.get("mixed_waste_kg_per_week", 0)
+        new_waste["mixed_waste_kg_per_week"] = weekly * 0.92
+
+
 
     # --- Yeni senaryo sonuçlarını hesapla ---
     new_results = {
